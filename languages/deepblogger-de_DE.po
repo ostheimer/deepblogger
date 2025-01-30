@@ -21,14 +21,11 @@ msgstr "Holen Sie sich Ihren API-Schlüssel von %s"
 msgid "OpenAI Model"
 msgstr "OpenAI-Modell"
 
-msgid "Most capable GPT-4 model, better at complex tasks"
-msgstr "Leistungsfähigstes GPT-4-Modell, besser bei komplexen Aufgaben"
-
 msgid "Fast and cost-effective for most tasks"
 msgstr "Schnell und kostengünstig für die meisten Aufgaben"
 
-msgid "Select the OpenAI model to use for generating posts. More capable models produce better content but cost more."
-msgstr "Wählen Sie das OpenAI-Modell für die Beitragsgenerierung. Leistungsfähigere Modelle erzeugen bessere Inhalte, sind aber teurer."
+msgid "Select the OpenAI model to use for generating posts"
+msgstr "Wählen Sie das OpenAI-Modell für die Beitragsgenerierung"
 
 msgid "No models received from OpenAI"
 msgstr "Keine Modelle von OpenAI empfangen"
@@ -185,12 +182,6 @@ msgstr "Ungültige Antwort von der OpenAI API"
 msgid "Error fetching models: %s"
 msgstr "Fehler beim Abrufen der Modelle: %s"
 
-msgid "GPT-4 (Leistungsfähigstes)"
-msgstr "GPT-4 (Leistungsfähigstes)"
-
-msgid "GPT-3.5 Turbo (Schneller & günstiger)"
-msgstr "GPT-3.5 Turbo (Schneller & günstiger)"
-
 msgid "Posts per Category"
 msgstr "Beiträge pro Kategorie"
 
@@ -210,4 +201,16 @@ msgid "Error saving settings"
 msgstr "Fehler beim Speichern der Einstellungen"
 
 msgid "Security check failed"
-msgstr "Sicherheitsüberprüfung fehlgeschlagen" 
+msgstr "Sicherheitsüberprüfung fehlgeschlagen"
+
+msgid "Model"
+msgstr "Modell"
+
+msgid "No models available"
+msgstr "Keine Modelle verfügbar"
+
+msgid "Loading models..."
+msgstr "Lade Modelle..."
+
+msgid "Please select a model"
+msgstr "Bitte wählen Sie ein Modell" 

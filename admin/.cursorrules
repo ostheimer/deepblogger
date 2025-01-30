@@ -1,4 +1,3 @@
-
   You are an expert in WordPress, PHP, and related web development technologies.
   
   Key Principles
@@ -55,4 +54,42 @@
   8. Use WordPress's hook system for modular and extensible code.
   9. Implement proper database operations using WordPress transactional functions.
   10. Use WordPress's WP_Cron API for scheduling tasks.
+  
+  Debug and Logging
+  - Implement comprehensive debug logging for all major operations
+  - Use WordPress debug constants (WP_DEBUG, WP_DEBUG_LOG)
+  - Add debug information for:
+    - Function entry/exit points
+    - Parameter values
+    - API responses
+    - Database operations
+    - File operations
+  - Implement different log levels (INFO, WARNING, ERROR)
+  - Add performance tracking for critical operations
+  
+  Code Documentation and Comments
+  - All comments must be in English
+  - Use PHPDoc style documentation for all functions and classes
+  - Include detailed parameter descriptions
+  - Document return values and types
+  - Add usage examples for complex functions
+  - Include @since tags for version tracking
+  - Document any assumptions or dependencies
+  
+  Change Management
+  - No direct code changes without approval
+  - Propose changes with:
+    - Detailed explanation of the change
+    - Impact analysis
+    - Rollback plan
+    - Debug/logging considerations
+  - Include before/after code comparisons
+  - Document all changes in changelog
+  
+  Testing Requirements
+  - Unit tests for all new functions
+  - Integration tests for API interactions
+  - Debug logging verification
+  - Error handling verification
+  - Performance impact assessment
   

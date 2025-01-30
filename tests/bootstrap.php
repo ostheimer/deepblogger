@@ -43,9 +43,12 @@ function _init_test_env() {
     add_filter('wp_mail', '__return_false');
     
     // Setze Test-Optionen
-    update_option('deepblogger_openai_api_key', 'test_key');
-    update_option('deepblogger_openai_model', 'gpt-3.5-turbo');
+    update_option('deepblogger_ai_provider', 'openai');
+    update_option('deepblogger_openai_api_key', 'test-key');
+    update_option('deepblogger_openai_model', '');  // Kein Default-Modell
     update_option('deepblogger_post_status', 'draft');
+    update_option('deepblogger_posts_per_category', 1);
+    update_option('deepblogger_post_categories', array());
     
     // Erstelle Test-Kategorie
     $category_id = wp_create_category('Test Kategorie');

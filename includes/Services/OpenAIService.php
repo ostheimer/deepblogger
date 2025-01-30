@@ -43,7 +43,7 @@ class OpenAIService {
     /**
      * Constructor
      */
-    public function __construct(string $apiKey, string $model = 'gpt-3.5-turbo') {
+    public function __construct(string $apiKey, string $model = '') {
         $this->apiKey = $apiKey;
         $this->model = $model;
         $this->api_endpoint = $this->api_base . '/chat/completions';
@@ -122,7 +122,9 @@ class OpenAIService {
      * @return string Formatted model name
      */
     private function format_model_name($model_id) {
-        $name = str_replace(['gpt-4', 'gpt-3.5-turbo'], ['GPT-4', 'GPT-3.5 Turbo'], $model_id);
+        // Entferne technische Suffixe
+        $name = preg_replace('/-\d{4}|-\d{2}|-preview/', '', $model_id);
+        // Mache den Namen lesbarer
         return ucwords(str_replace('-', ' ', $name));
     }
 
@@ -133,13 +135,28 @@ class OpenAIService {
      * @return string Model description
      */
     private function get_model_description($model_id) {
-        if (strpos($model_id, 'gpt-4') === 0) {
-            return \esc_html__('Most capable GPT-4 model, better at complex tasks', 'deepblogger');
+        // Beschreibung basierend auf API-Informationen
+        $response = wp_remote_get(
+            $this->api_base . '/models/' . $model_id,
+            array(
+                'headers' => array(
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json'
+                )
+            )
+        );
+
+        if (!is_wp_error($response)) {
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
+            
+            if (isset($data['description'])) {
+                return esc_html($data['description']);
+            }
         }
-        if (strpos($model_id, 'gpt-3.5-turbo') === 0) {
-            return \esc_html__('Fast and cost-effective for most tasks', 'deepblogger');
-        }
-        return '';
+
+        // Fallback
+        return esc_html__('Keine Beschreibung verfügbar', 'deepblogger');
     }
 
     /**

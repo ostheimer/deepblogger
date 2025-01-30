@@ -1,0 +1,89 @@
+/* Admin-spezifische Styles */
+
+.deepblogger-section {
+    background: #fff;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.form-field {
+    margin: 1.5em 0;
+}
+
+.form-field label {
+    display: block;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+}
+
+.form-field input[type="text"],
+.form-field input[type="password"],
+.form-field select {
+    width: 100%;
+    max-width: 400px;
+}
+
+.provider-section {
+    display: none;
+}
+
+.provider-section.active {
+    display: block !important;
+}
+
+.categories-wrapper {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+.categories-wrapper label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: normal;
+}
+
+.status-section {
+    margin-top: 20px;
+}
+
+.status-step {
+    display: none;
+    padding: 10px;
+    margin: 5px 0;
+    background: #f8f9fa;
+    border-left: 4px solid #646970;
+}
+
+.status-step.active {
+    display: block;
+}
+
+.status-step.loading .dashicons:before {
+    content: "\f463";
+    animation: dashicons-spin 1s infinite;
+    display: inline-block;
+}
+
+.status-step.completed .dashicons:before {
+    content: "\f147";
+    color: #46b450;
+}
+
+@keyframes dashicons-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#settings-saved,
+#settings-error {
+    margin: 1em 0;
+} 
