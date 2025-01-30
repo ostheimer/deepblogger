@@ -1,0 +1,28 @@
+{
+  "name": "deepblogger",
+  "version": "1.0.0",
+  "description": "Ein WordPress-Plugin zur automatischen Generierung und Veröffentlichung von Blog-Beiträgen mit ChatGPT.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test": "cypress run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ostheimer/deepblogger.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ostheimer/deepblogger/issues"
+  },
+  "homepage": "https://github.com/ostheimer/deepblogger#readme",
+  "devDependencies": {
+    "cypress": "^13.6.4"
+  }
+}

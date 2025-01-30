@@ -1,0 +1,118 @@
+name: deepblogger
+
+services:
+  # PHP Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deepblogger-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    networks:
+      - deepblogger
+
+  # Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: deepblogger-nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - wordpress:/var/www/html
+      - ./docker/nginx:/etc/nginx/conf.d/
+    depends_on:
+      - wordpress
+    networks:
+      - deepblogger
+
+  # MySQL Service
+  db:
+    platform: linux/amd64
+    image: mysql:8.0
+    container_name: deepblogger-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - deepblogger
+    command: --default-authentication-plugin=mysql_native_password
+
+  # WordPress
+  wordpress:
+    platform: linux/amd64
+    image: wordpress:php8.1-fpm
+    container_name: deepblogger-wordpress
+    depends_on:
+      - db
+      - app
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress_password
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME','http://localhost:8000');
+        define('WP_SITEURL','http://localhost:8000');
+    volumes:
+      - wordpress:/var/www/html
+      - .:/var/www/html/wp-content/plugins/deepblogger
+    networks:
+      - deepblogger
+
+  # PHPMyAdmin
+  phpmyadmin:
+    platform: linux/amd64
+    image: phpmyadmin/phpmyadmin
+    container_name: deepblogger-phpmyadmin
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root_password
+      APACHE_SERVER_NAME: localhost
+    ports:
+      - "8080:80"
+    networks:
+      - deepblogger
+
+  # Redis for caching
+  redis:
+    image: redis:alpine
+    container_name: deepblogger-redis
+    volumes:
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - deepblogger
+
+  # Mailhog for email testing
+  mailhog:
+    platform: linux/amd64
+    image: mailhog/mailhog
+    container_name: deepblogger-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - deepblogger
+
+networks:
+  deepblogger:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
+  wordpress:
+    driver: local 

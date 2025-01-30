@@ -1,0 +1,213 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: DeepBlogger 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/andreasostheimer/deepblogger/issues\n"
+"POT-Creation-Date: 2024-01-29 12:00+0000\n"
+"PO-Revision-Date: 2024-01-29 12:00+0000\n"
+"Last-Translator: Andreas Ostheimer\n"
+"Language-Team: German\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "OpenAI API Key"
+msgstr "OpenAI API-Schlüssel"
+
+msgid "Get your API key from %s"
+msgstr "Holen Sie sich Ihren API-Schlüssel von %s"
+
+msgid "OpenAI Model"
+msgstr "OpenAI-Modell"
+
+msgid "Most capable GPT-4 model, better at complex tasks"
+msgstr "Leistungsfähigstes GPT-4-Modell, besser bei komplexen Aufgaben"
+
+msgid "Fast and cost-effective for most tasks"
+msgstr "Schnell und kostengünstig für die meisten Aufgaben"
+
+msgid "Select the OpenAI model to use for generating posts. More capable models produce better content but cost more."
+msgstr "Wählen Sie das OpenAI-Modell für die Beitragsgenerierung. Leistungsfähigere Modelle erzeugen bessere Inhalte, sind aber teurer."
+
+msgid "No models received from OpenAI"
+msgstr "Keine Modelle von OpenAI empfangen"
+
+msgid "Every %1$s %2$s"
+msgid_plural "Every %1$s %2$s"
+msgstr[0] "Alle %1$s %2$s"
+msgstr[1] "Alle %1$s %2$s"
+
+msgid "minutes"
+msgstr "Minuten"
+
+msgid "hours"
+msgstr "Stunden"
+
+msgid "days"
+msgstr "Tage"
+
+msgid "How often should new posts be generated?"
+msgstr "Wie oft sollen neue Beiträge generiert werden?"
+
+msgid "Preparing..."
+msgstr "Vorbereitung..."
+
+msgid "Generating content..."
+msgstr "Generiere Inhalt..."
+
+msgid "Generating featured image..."
+msgstr "Generiere Artikelbild..."
+
+msgid "Publishing post..."
+msgstr "Veröffentliche Beitrag..."
+
+msgid "Error: "
+msgstr "Fehler: "
+
+msgid "Error: Could not connect to the server"
+msgstr "Fehler: Konnte keine Verbindung zum Server herstellen"
+
+msgid "Generate Posts Now"
+msgstr "Beiträge jetzt generieren"
+
+msgid "No content generated"
+msgstr "Kein Inhalt generiert"
+
+msgid "New Post: %s"
+msgstr "Neuer Beitrag: %s"
+
+msgid "%d posts created successfully"
+msgstr "%d Beiträge erfolgreich erstellt"
+
+msgid "Insufficient permissions"
+msgstr "Unzureichende Berechtigungen"
+
+msgid "No categories selected"
+msgstr "Keine Kategorien ausgewählt"
+
+msgid "OpenAI API key is not configured"
+msgstr "OpenAI API-Schlüssel ist nicht konfiguriert"
+
+msgid "No response received from OpenAI"
+msgstr "Keine Antwort von OpenAI erhalten"
+
+msgid "Post Schedule"
+msgstr "Beitragsplan"
+
+msgid "Categories"
+msgstr "Kategorien"
+
+msgid "Generating posts..."
+msgstr "Generiere Beiträge..."
+
+msgid "Posts generated successfully!"
+msgstr "Beiträge erfolgreich generiert!"
+
+msgid "Daily"
+msgstr "Täglich"
+
+msgid "Weekly"
+msgstr "Wöchentlich"
+
+msgid "Monthly"
+msgstr "Monatlich"
+
+msgid "No topics configured"
+msgstr "Keine Themen konfiguriert"
+
+msgid "New DeepBlogger Post: %s"
+msgstr "Neuer DeepBlogger Beitrag: %s"
+
+msgid "A new post has been created:\n\nTopic: %s\nEdit: %s"
+msgstr "Ein neuer Beitrag wurde erstellt:\n\nThema: %s\nBearbeiten: %s"
+
+msgid "DeepBlogger Error"
+msgstr "DeepBlogger Fehler"
+
+msgid "An error occurred during automatic post creation:\n\n%s"
+msgstr "Bei der automatischen Beitragserstellung ist ein Fehler aufgetreten:\n\n%s"
+
+msgid "Post Status"
+msgstr "Publikationsstatus"
+
+msgid "Publish immediately"
+msgstr "Sofort veröffentlichen"
+
+msgid "Save as draft"
+msgstr "Als Entwurf speichern"
+
+msgid "Generating content for category \"%s\"..."
+msgstr "Generiere Inhalt für Kategorie \"%s\"..."
+
+msgid "Post %d of %d created"
+msgstr "Beitrag %d von %d erstellt"
+
+msgid "Custom Prompt"
+msgstr "Eigener Prompt"
+
+msgid "Enter a custom prompt for post generation. Available placeholders: [CATEGORY], [STYLE], [LENGTH]. Leave empty to use default prompt."
+msgstr "Gib einen eigenen Prompt für die Beitragsgenerierung ein. Verfügbare Platzhalter: [KATEGORIE], [SCHREIBSTIL], [LÄNGE]. Leer lassen für Standardprompt."
+
+msgid "Write an informative and engaging blog post about [CATEGORY]. The article should be well-structured and cover important aspects of the topic. Use a [STYLE] writing style and keep the text approximately [LENGTH] words long."
+msgstr "Schreibe einen informativen und ansprechenden Blogbeitrag zum Thema [KATEGORIE]. Der Artikel sollte gut strukturiert sein und wichtige Aspekte des Themas abdecken. Verwende einen [SCHREIBSTIL] Schreibstil und halte den Text etwa [LÄNGE] Wörter lang."
+
+msgid "Prompt"
+msgstr "Prompt"
+
+msgid "Adjust the prompt for post generation. The default prompt can be supplemented or completely replaced. Available placeholders: [CATEGORY], [STYLE], [LENGTH], [EXISTING_CONTENT]"
+msgstr "Passe den Prompt für die Beitragsgenerierung an. Der Standardprompt kann ergänzt oder vollständig ersetzt werden. Verfügbare Platzhalter: [KATEGORIE], [SCHREIBSTIL], [LÄNGE], [VORHANDENER_INHALT]"
+
+msgid "Update: %s"
+msgstr "Aktualisierung: %s"
+
+msgid "This article is an extension to our post \"%s\". [Go to original article](%s)"
+msgstr "Dieser Artikel ist eine Erweiterung zu unserem Beitrag \"%s\". [Zum ursprünglichen Artikel](%s)"
+
+msgid "Error creating post"
+msgstr "Fehler beim Erstellen des Beitrags"
+
+msgid "Similar post found (Similarity: %d%%)"
+msgstr "Ähnlicher Beitrag gefunden (Ähnlichkeit: %d%%)"
+
+msgid "New topic despite similarity"
+msgstr "Neues Thema trotz Ähnlichkeit"
+
+msgid "Automatic decision based on similarity"
+msgstr "Automatische Entscheidung basierend auf Ähnlichkeit"
+
+msgid "No similar post found"
+msgstr "Kein ähnlicher Beitrag gefunden"
+
+msgid "Invalid response from OpenAI API"
+msgstr "Ungültige Antwort von der OpenAI API"
+
+msgid "Error fetching models: %s"
+msgstr "Fehler beim Abrufen der Modelle: %s"
+
+msgid "GPT-4 (Leistungsfähigstes)"
+msgstr "GPT-4 (Leistungsfähigstes)"
+
+msgid "GPT-3.5 Turbo (Schneller & günstiger)"
+msgstr "GPT-3.5 Turbo (Schneller & günstiger)"
+
+msgid "Posts per Category"
+msgstr "Beiträge pro Kategorie"
+
+msgid "Number of posts to generate per category in each generation run (1-10)."
+msgstr "Anzahl der Beiträge, die pro Kategorie bei jedem Generierungslauf erstellt werden sollen (1-10)."
+
+msgid "No GPT models found in OpenAI API response"
+msgstr "Keine GPT-Modelle in der OpenAI API-Antwort gefunden"
+
+msgid "Invalid response from OpenAI API: %s"
+msgstr "Ungültige Antwort von der OpenAI API: %s"
+
+msgid "Settings saved successfully"
+msgstr "Einstellungen erfolgreich gespeichert"
+
+msgid "Error saving settings"
+msgstr "Fehler beim Speichern der Einstellungen"
+
+msgid "Security check failed"
+msgstr "Sicherheitsüberprüfung fehlgeschlagen" 
