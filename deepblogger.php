@@ -122,6 +122,9 @@ class DeepBlogger {
 
         // Add custom cron interval
         add_filter('cron_schedules', [$this, 'add_cron_interval']);
+
+        // Lädt die erforderlichen Abhängigkeiten für dieses Plugin.
+        $this->load_dependencies();
     }
 
     /**
@@ -150,6 +153,28 @@ class DeepBlogger {
         ];
 
         return $schedules;
+    }
+
+    /**
+     * Lädt die erforderlichen Abhängigkeiten für dieses Plugin.
+     */
+    private function load_dependencies() {
+        // Logger-Klasse
+        require_once plugin_dir_path(__FILE__) . 'includes/class-deepblogger-logger.php';
+
+        // Admin-Klasse
+        require_once plugin_dir_path(__FILE__) . 'admin/class-deepblogger-admin.php';
+
+        // OpenAI Service
+        require_once plugin_dir_path(__FILE__) . 'includes/ai/class-openai-service.php';
+
+        // Die Klasse, die für die Definition von Internationalisierung zuständig ist
+        require_once plugin_dir_path(__FILE__) . 'includes/class-deepblogger-i18n.php';
+
+        // Die Klasse, die alle Hooks für den Admin-Bereich registriert
+        require_once plugin_dir_path(__FILE__) . 'includes/class-deepblogger-loader.php';
+
+        $this->loader = new DeepBlogger_Loader();
     }
 }
 

@@ -41,7 +41,7 @@ class DeepBlogger_Admin {
 
         wp_enqueue_style(
             'deepblogger-admin',
-            plugin_dir_url(dirname(__FILE__)) . 'admin/css/deepblogger-admin.css',
+            plugin_dir_url(__FILE__) . 'css/deepblogger-admin.css',
             array(),
             $this->version,
             'all'
@@ -79,7 +79,8 @@ class DeepBlogger_Admin {
                     'loading' => __('Lade...', 'deepblogger'),
                     'saving' => __('Speichere...', 'deepblogger'),
                     'saved' => __('Einstellungen gespeichert', 'deepblogger'),
-                    'error' => __('Fehler', 'deepblogger')
+                    'error' => __('Fehler', 'deepblogger'),
+                    'loadingModels' => __('Lade Modelle...', 'deepblogger')
                 ),
                 'debug' => WP_DEBUG
             )
@@ -361,21 +362,35 @@ class DeepBlogger_Admin {
     }
 
     /**
-     * Callback für das Modell-Feld
+     * Callback für das OpenAI Modell-Feld
      */
     public function openai_model_field_callback() {
         $model = get_option('deepblogger_openai_model', '');
         
-        // OpenAI Service initialisieren und Modelle abrufen
-        $openai_service = new OpenAIService();
-        $models = $openai_service->get_available_models();
+        echo '<div class="model-field-wrapper">';
+        echo '<div class="model-select-container">';
         
-        echo '<select id="deepblogger_openai_model" name="deepblogger_openai_model">';
-        foreach ($models as $model_id => $model_name) {
-            echo '<option value="' . esc_attr($model_id) . '"' . selected($model, $model_id, false) . '>' . esc_html($model_name) . '</option>';
-        }
+        // Select-Feld mit gespeichertem Wert
+        echo '<select id="deepblogger_openai_model" name="deepblogger_openai_model" class="model-select" data-saved-model="' . esc_attr($model) . '">';
+        echo '<option value="">' . esc_html__('Lade Modelle...', 'deepblogger') . '</option>';
         echo '</select>';
+        
+        // WordPress Spinner (ohne is-active Klasse)
+        echo '<span class="spinner"></span>';
+        
+        // Refresh Button
+        echo '<button type="button" class="button refresh-models" data-provider="openai">';
+        echo '<span class="dashicons dashicons-update"></span> ';
+        echo esc_html__('Modelle aktualisieren', 'deepblogger');
+        echo '</button>';
+        
+        echo '</div>'; // Ende .model-select-container
+        
+        // Beschreibung und Status
         echo '<p class="description">' . esc_html__('Wählen Sie das zu verwendende OpenAI-Modell.', 'deepblogger') . '</p>';
+        echo '<div class="model-status"></div>';
+        
+        echo '</div>'; // Ende .model-field-wrapper
     }
 
     /**
@@ -433,6 +448,8 @@ class DeepBlogger_Admin {
         }
 
         $provider = isset($_POST['provider']) ? sanitize_text_field($_POST['provider']) : '';
+        $force_refresh = isset($_POST['force_refresh']) ? (bool)$_POST['force_refresh'] : false;
+
         if (empty($provider)) {
             wp_send_json_error('Kein Provider angegeben');
             return;
@@ -443,8 +460,9 @@ class DeepBlogger_Admin {
             
             switch ($provider) {
                 case 'openai':
-                    $openai_service = new OpenAIService();
-                    $models = $openai_service->get_available_models();
+                    $api_key = get_option('deepblogger_openai_api_key', '');
+                    $openai_service = new OpenAIService($api_key);
+                    $models = $openai_service->get_available_models($force_refresh);
                     break;
                     
                 case 'deepseek':

@@ -144,17 +144,21 @@ jQuery(document).ready(function($) {
                 nonce: deepbloggerAdmin.nonce
             },
             success: function(response) {
-                if (response.success && response.data.models) {
+                console.log('API Response:', response); // Debug-Ausgabe
+
+                if (response.success && response.data && Array.isArray(response.data.models)) {
                     $modelSelect.empty().append($('<option>', {
                         value: '',
                         text: '<?php echo esc_js(__('Bitte wählen...', 'deepblogger')); ?>'
                     }));
 
                     response.data.models.forEach(function(model) {
-                        $modelSelect.append($('<option>', {
-                            value: model.id,
-                            text: model.name
-                        }));
+                        if (model && model.id && model.name) {
+                            $modelSelect.append($('<option>', {
+                                value: model.id,
+                                text: model.name
+                            }));
+                        }
                     });
 
                     if (response.data.message) {
@@ -165,13 +169,18 @@ jQuery(document).ready(function($) {
                         $modelStatus.hide();
                     }
                 } else {
-                    var errorMsg = response.data.message || '<?php echo esc_js(__('Fehler beim Laden der Modelle', 'deepblogger')); ?>';
+                    console.error('Ungültige API-Antwort:', response); // Debug-Ausgabe
+                    var errorMsg = response.data && response.data.message 
+                        ? response.data.message 
+                        : '<?php echo esc_js(__('Fehler beim Laden der Modelle', 'deepblogger')); ?>';
+                    
                     $modelStatus.text(errorMsg)
                         .addClass('notice-error')
                         .removeClass('notice-success');
                 }
             },
             error: function(xhr, status, error) {
+                console.error('AJAX Error:', {xhr: xhr, status: status, error: error}); // Debug-Ausgabe
                 var errorMsg = '<?php echo esc_js(__('Verbindungsfehler beim Laden der Modelle', 'deepblogger')); ?>';
                 $modelStatus.text(errorMsg)
                     .addClass('notice-error')
@@ -188,7 +197,25 @@ jQuery(document).ready(function($) {
         var provider = $(this).val();
         $('.provider-section').hide();
         $('#' + provider + '-settings').show();
-        loadAvailableModels(provider);
+        
+        // Prüfe ob API Key vorhanden ist
+        var apiKey = provider === 'openai' 
+            ? $('#deepblogger_openai_api_key').val() 
+            : $('#deepblogger_deepseek_api_key').val();
+            
+        if (apiKey) {
+            loadAvailableModels(provider);
+        } else {
+            var $modelSelect = provider === 'openai' 
+                ? $('#deepblogger_openai_model') 
+                : $('#deepblogger_deepseek_model');
+            var $modelStatus = $modelSelect.siblings('.model-status');
+            
+            $modelStatus.text('<?php echo esc_js(__('Bitte geben Sie zuerst einen API-Schlüssel ein', 'deepblogger')); ?>')
+                .addClass('notice-error')
+                .removeClass('notice-success')
+                .show();
+        }
     }).trigger('change');
 
     // Lade Modelle wenn API Key geändert wird

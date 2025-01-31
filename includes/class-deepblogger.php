@@ -22,7 +22,13 @@ class DeepBlogger {
         $this->plugin_name = 'deepblogger';
         $this->version = '1.0.0';
 
+        // Lade die Abhängigkeiten
         $this->load_dependencies();
+        
+        // Initialisiere die Internationalisierung
+        $this->set_locale();
+        
+        // Registriere die Admin-Hooks
         $this->define_admin_hooks();
     }
 
@@ -30,8 +36,30 @@ class DeepBlogger {
      * Lädt die erforderlichen Abhängigkeiten für dieses Plugin
      */
     private function load_dependencies() {
+        // Logger-Klasse muss als erstes geladen werden
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-deepblogger-logger.php';
+
+        // Loader für die Plugin-Hooks
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-deepblogger-loader.php';
+
+        // Internationalisierung
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-deepblogger-i18n.php';
+
+        // Admin-Funktionalität
         require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-deepblogger-admin.php';
-        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/Services/OpenAIService.php';
+
+        // AI Services
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/ai/class-openai-service.php';
+
+        $this->loader = new DeepBlogger_Loader();
+    }
+
+    /**
+     * Definiert die Locale für dieses Plugin für Internationalisierung.
+     */
+    private function set_locale() {
+        $plugin_i18n = new DeepBlogger_i18n();
+        $this->loader->add_action('plugins_loaded', $plugin_i18n, 'load_plugin_textdomain');
     }
 
     /**

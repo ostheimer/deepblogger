@@ -24,70 +24,149 @@ jQuery(document).ready(function($) {
     }
 
     // Load available models for the selected provider
-    function loadAvailableModels(provider) {
+    function loadAvailableModels(provider, forceRefresh = false) {
         debugLog('Loading models for provider:', provider);
         
         var $modelSelect = $('#' + provider + '_model');
-        var $modelStatus = $modelSelect.siblings('.model-status');
-        var currentModel = $modelSelect.data('current-model');
+        var $modelStatus = $('.model-status');
+        var $refreshButton = $('.refresh-models[data-provider="' + provider + '"]');
+        var $container = $modelSelect.closest('.model-select-container');
+        var $spinner = $container.find('.spinner');
         
         if (!$modelSelect.length) {
             debugLog('Model select not found for provider:', provider);
             return;
         }
 
-        $modelSelect.prop('disabled', true);
-        $modelStatus.text($modelSelect.data('loading'));
+        // Show loading state immediately
+        $modelSelect.prop('disabled', true)
+            .addClass('loading');
+        $refreshButton.prop('disabled', true)
+            .find('.dashicons')
+            .addClass('dashicons-update-spin');
+        $spinner.addClass('is-active');
 
-        $.ajax({
+        // Zeige Ladestatus mit Animation
+        var $loadingOption = $('<option>', {
+            value: '',
+            text: 'Lade Modelle',
+            class: 'loading-text'
+        });
+        $modelSelect.empty().append($loadingOption);
+        
+        var loadingInterval = setInterval(function() {
+            var currentText = $loadingOption.text();
+            var dots = currentText.match(/\./g) || [];
+            $loadingOption.text('Lade Modelle' + (dots.length >= 3 ? '' : '.'.repeat(dots.length + 1)));
+        }, 500);
+
+        // Perform the AJAX request
+        return $.ajax({
             url: deepbloggerAdmin.ajaxurl,
             type: 'POST',
             data: {
                 action: 'deepblogger_get_models',
                 provider: provider,
+                force_refresh: forceRefresh,
                 nonce: deepbloggerAdmin.nonce
             },
-            success: function(response) {
-                debugLog('Models response:', response);
-                
-                if (response.success && response.data.models) {
-                    $modelSelect.empty().append($('<option>', {
-                        value: '',
-                        text: deepbloggerAdmin.strings.selectModel
+            timeout: 30000 // 30 Sekunden Timeout
+        })
+        .done(function(response) {
+            debugLog('Models response:', response);
+            clearInterval(loadingInterval);
+            
+            if (response.success && response.data && response.data.models && response.data.models.length > 0) {
+                $modelSelect.empty().append($('<option>', {
+                    value: '',
+                    text: deepbloggerAdmin.strings.selectModel || 'Modell auswählen'
+                }));
+
+                // Direkte Verwendung des Models-Array
+                response.data.models.forEach(function(model) {
+                    $modelSelect.append($('<option>', {
+                        value: model.id,
+                        text: model.name
                     }));
+                });
 
-                    $.each(response.data.models, function(id, name) {
-                        $modelSelect.append($('<option>', {
-                            value: id,
-                            text: name,
-                            selected: id === currentModel
-                        }));
-                    });
-
-                    $modelStatus.text(deepbloggerAdmin.strings.modelsLoaded)
-                        .removeClass('error')
-                        .addClass('success');
-                } else {
-                    debugLog('Error in models response:', response);
-                    $modelStatus.text(response.data.message || deepbloggerAdmin.strings.modelLoadError)
-                        .removeClass('success')
-                        .addClass('error');
+                // Setze den gespeicherten Wert, falls vorhanden
+                var savedModel = $modelSelect.data('saved-model');
+                if (savedModel) {
+                    $modelSelect.val(savedModel);
                 }
-            },
-            error: function(xhr, status, error) {
-                debugLog('AJAX error:', { status: status, error: error });
-                $modelStatus.text(deepbloggerAdmin.strings.modelLoadError)
-                    .removeClass('success')
+
+                $modelStatus.text(deepbloggerAdmin.strings.modelsLoaded || 'Modelle erfolgreich geladen')
+                    .removeClass('loading error')
+                    .addClass('success')
+                    .delay(2000)
+                    .fadeOut();
+            } else {
+                var errorMessage = response.data && response.data.message ? 
+                    response.data.message : 
+                    (deepbloggerAdmin.strings.modelLoadError || 'Fehler beim Laden der Modelle');
+                
+                debugLog('Error in models response:', response);
+                $modelSelect.empty().append($('<option>', {
+                    value: '',
+                    text: errorMessage
+                }));
+                
+                $modelStatus.text(errorMessage)
+                    .removeClass('loading success')
                     .addClass('error');
-            },
-            complete: function() {
-                $modelSelect.prop('disabled', false);
+            }
+        })
+        .fail(function(xhr, status, error) {
+            clearInterval(loadingInterval);
+            
+            var errorMessage = '';
+            if (status === 'timeout') {
+                errorMessage = 'Zeitüberschreitung beim Laden der Modelle';
+            } else if (xhr.status === 0) {
+                errorMessage = 'Keine Verbindung zum Server möglich';
+            } else {
+                errorMessage = 'Fehler beim Laden der Modelle: ' + (error || status);
+            }
+            
+            debugLog('Ajax error:', {xhr: xhr, status: status, error: error});
+            $modelSelect.empty().append($('<option>', {
+                value: '',
+                text: errorMessage
+            }));
+            
+            $modelStatus.text(errorMessage)
+                .removeClass('loading success')
+                .addClass('error');
+        })
+        .always(function() {
+            $modelSelect.prop('disabled', false)
+                .removeClass('loading');
+            $refreshButton.prop('disabled', false)
+                .find('.dashicons')
+                .removeClass('dashicons-update-spin');
+            $spinner.removeClass('is-active');
+        });
+    }
+
+    // Initialize provider sections and load models asynchronously
+    function initializeProviderSettings() {
+        toggleProviderSections();
+        
+        // Load models for providers with API keys
+        $('.ai-provider-api-key').each(function() {
+            var provider = $(this).data('provider');
+            if ($(this).val()) {
+                // Delay each provider load slightly to prevent overwhelming the server
+                setTimeout(function() {
+                    loadAvailableModels(provider);
+                }, 100);
             }
         });
     }
 
-    // Initialize provider sections
-    toggleProviderSections();
+    // Initialize on page load
+    initializeProviderSettings();
 
     // Handle provider change
     $('#deepblogger_ai_provider').on('change', function() {
@@ -95,19 +174,37 @@ jQuery(document).ready(function($) {
         loadAvailableModels($(this).val());
     });
 
-    // Load models on page load if API key is set
-    $('.ai-provider-api-key').each(function() {
+    // Handle refresh button click
+    $('.refresh-models').on('click', function() {
         var provider = $(this).data('provider');
-        if ($(this).val()) {
-            loadAvailableModels(provider);
-        }
+        var $button = $(this);
+        
+        // Disable button and show loading state
+        $button.prop('disabled', true)
+            .find('.dashicons')
+            .addClass('dashicons-update-spin');
+        
+        loadAvailableModels(provider, true)
+            .always(function() {
+                // Re-enable button and stop spinning
+                $button.prop('disabled', false)
+                    .find('.dashicons')
+                    .removeClass('dashicons-update-spin');
+            });
     });
 
-    // Load models when API key is changed
-    $('.ai-provider-api-key').on('change', function() {
-        var provider = $(this).data('provider');
-        if ($(this).val()) {
-            loadAvailableModels(provider);
+    // Load models when API key is changed (with debounce)
+    var apiKeyChangeTimeout;
+    $('.ai-provider-api-key').on('input', function() {
+        var $input = $(this);
+        var provider = $input.data('provider');
+        
+        clearTimeout(apiKeyChangeTimeout);
+        
+        if ($input.val()) {
+            apiKeyChangeTimeout = setTimeout(function() {
+                loadAvailableModels(provider);
+            }, 500); // Wait 500ms after last input before loading
         }
     });
 

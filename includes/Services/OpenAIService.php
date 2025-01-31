@@ -1,6 +1,28 @@
 <?php
 namespace DeepBlogger\Services;
 
+// Ensure WordPress is loaded
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// WordPress-Konstanten
+if (!defined('HOUR_IN_SECONDS')) {
+    require_once(ABSPATH . 'wp-includes/default-constants.php');
+}
+
+// WordPress-Funktionen importieren
+use function get_transient;
+use function set_transient;
+use function wp_remote_get;
+use function wp_remote_retrieve_body;
+use function wp_remote_retrieve_response_code;
+use function wp_remote_retrieve_response_message;
+use function is_wp_error;
+use function esc_html__;
+use function wp_json_encode;
+use function wpautop;
+
 /**
  * Service class for OpenAI API integration
  */
@@ -52,67 +74,68 @@ class OpenAIService {
     /**
      * Get available models from OpenAI API
      *
+     * @param bool $force_refresh Force refresh of models from API
      * @return array Array of available models
      * @throws \Exception If API request fails
      */
-    public function get_available_models() {
-        if (empty($this->apiKey)) {
-            throw new \Exception(\esc_html__('OpenAI API key is not configured', 'deepblogger'));
+    public function get_available_models($force_refresh = false) {
+        // Prüfe zuerst den statischen Cache
+        static $cached_models = null;
+        if ($cached_models !== null && !$force_refresh) {
+            return $cached_models;
         }
 
-        if (self::$available_models !== null) {
-            return self::$available_models;
+        // Prüfe dann den transienten Cache
+        $transient_key = 'deepblogger_openai_models_' . md5($this->apiKey);
+        if (!$force_refresh) {
+            $cached_models = get_transient($transient_key);
+            if ($cached_models !== false) {
+                return $cached_models;
+            }
         }
 
-        try {
-            $response = \wp_remote_get($this->api_base . '/models', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type' => 'application/json',
-                ],
-                'timeout' => 30
-            ]);
+        // Hole die Modelle von der API
+        $response = wp_remote_get('https://api.openai.com/v1/models', array(
+            'headers' => array(
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json'
+            ),
+            'timeout' => 15
+        ));
 
-            if (\is_wp_error($response)) {
-                throw new \Exception($response->get_error_message());
-            }
-
-            $status_code = \wp_remote_retrieve_response_code($response);
-            if ($status_code !== 200) {
-                $error_message = \wp_remote_retrieve_response_message($response);
-                throw new \Exception(\esc_html__('Invalid response from OpenAI API', 'deepblogger') . ': ' . $error_message);
-            }
-
-            $body = json_decode(\wp_remote_retrieve_body($response), true);
-            
-            if (!isset($body['data']) || !is_array($body['data'])) {
-                throw new \Exception(\esc_html__('Invalid response from OpenAI API', 'deepblogger'));
-            }
-
-            // Filter für Chat-Modelle
-            $chat_models = array_filter($body['data'], function($model) {
-                return strpos($model['id'], 'gpt-') === 0;
-            });
-
-            if (empty($chat_models)) {
-                throw new \Exception(\esc_html__('No GPT models found in OpenAI API response', 'deepblogger'));
-            }
-
-            self::$available_models = array_map(function($model) {
-                return [
-                    'id' => $model['id'],
-                    'name' => $this->format_model_name($model['id'])
-                ];
-            }, $chat_models);
-
-            return self::$available_models;
-        } catch (\Exception $e) {
-            error_log('DeepBlogger: Error fetching models: ' . $e->getMessage());
-            throw new \Exception(sprintf(
-                \esc_html__('Error fetching models: %s', 'deepblogger'),
-                $e->getMessage()
-            ));
+        if (is_wp_error($response)) {
+            throw new \Exception($response->get_error_message());
         }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        if ($response_code !== 200) {
+            $error_message = wp_remote_retrieve_response_message($response);
+            throw new \Exception("API-Fehler: " . $error_message);
+        }
+
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        if (!isset($body['data'])) {
+            throw new \Exception("Unerwartetes API-Antwortformat");
+        }
+
+        // Filtere die Chat-Modelle
+        $chat_models = array_filter($body['data'], function($model) {
+            return strpos($model['id'], 'gpt') !== false;
+        });
+
+        // Formatiere die Modelle
+        $formatted_models = array_map(function($model) {
+            return array(
+                'id' => $model['id'],
+                'name' => ucwords(str_replace('-', ' ', $model['id']))
+            );
+        }, $chat_models);
+
+        // Speichere im Cache für einen Tag
+        set_transient($transient_key, $formatted_models, DAY_IN_SECONDS);
+        $cached_models = $formatted_models;
+
+        return $formatted_models;
     }
 
     /**
@@ -393,12 +416,20 @@ class OpenAIService {
     /**
      * Format the API response for WordPress
      *
-     * @param string $content The raw content from OpenAI
+     * @param string|array $content The raw content from OpenAI
      * @return string The formatted content
      */
     private function format_response($content) {
+        // Wenn der Content ein Array ist, konvertiere ihn zu JSON
+        if (is_array($content)) {
+            $content = wp_json_encode($content);
+        }
+        
+        // Stelle sicher, dass der Content ein String ist
+        $content = strval($content);
+        
         // Basic formatting
-        $content = \wpautop($content);
+        $content = wpautop($content);
         
         // Ensure all links are nofollow
         $content = preg_replace('/<a(.*?)>/i', '<a$1 rel="nofollow">', $content);
