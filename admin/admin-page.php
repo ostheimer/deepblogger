@@ -34,15 +34,10 @@ settings_errors('deepblogger_messages');
         <p></p>
     </div>
 
-    <!-- KI-Einstellungen -->
-    <div class="deepblogger-section ki-settings-box">
-        <h2><?php echo esc_html__('KI-Einstellungen', 'deepblogger'); ?></h2>
-        
-        <!-- Nur noch eine Stelle für das Settings-Formular -->
+    <!-- Allgemeine Einstellungen -->
+    <div class="deepblogger-section">
         <form method="post" action="options.php" id="deepblogger-settings-form">
             <?php
-                // Hier werden nun alle Felder geladen,
-                // die in class-deepblogger-admin.php via register_setting und add_settings_field() registriert wurden
                 settings_fields('deepblogger_options');
                 do_settings_sections('deepblogger_options');
                 submit_button(__('Einstellungen speichern', 'deepblogger'));

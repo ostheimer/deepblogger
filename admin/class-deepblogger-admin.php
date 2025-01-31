@@ -113,7 +113,99 @@ class DeepBlogger_Admin {
      * Registriert die Plugin-Einstellungen
      */
     public function register_settings() {
-        // Allgemeine KI-Einstellungen
+        // Allgemeine Einstellungen Sektion
+        add_settings_section(
+            'deepblogger_general_section',
+            __('Allgemeine Einstellungen', 'deepblogger'),
+            array($this, 'general_section_callback'),
+            'deepblogger_options'
+        );
+
+        // Allgemeine Felder
+        add_settings_field(
+            'deepblogger_posts_per_category',
+            __('Beiträge pro Kategorie', 'deepblogger'),
+            array($this, 'posts_per_category_field_callback'),
+            'deepblogger_options',
+            'deepblogger_general_section'
+        );
+
+        add_settings_field(
+            'deepblogger_post_categories',
+            __('Kategorien', 'deepblogger'),
+            array($this, 'categories_field_callback'),
+            'deepblogger_options',
+            'deepblogger_general_section'
+        );
+
+        // KI-Provider Sektion
+        add_settings_section(
+            'deepblogger_ai_provider_section',
+            __('KI-Einstellungen', 'deepblogger'),
+            array($this, 'ai_provider_section_callback'),
+            'deepblogger_options'
+        );
+
+        // KI-Provider Feld
+        add_settings_field(
+            'deepblogger_ai_provider',
+            __('KI-Anbieter', 'deepblogger'),
+            array($this, 'ai_provider_field_callback'),
+            'deepblogger_options',
+            'deepblogger_ai_provider_section'
+        );
+
+        // OpenAI Sektion
+        add_settings_section(
+            'deepblogger_openai_section',
+            __('OpenAI Einstellungen', 'deepblogger'),
+            array($this, 'openai_section_callback'),
+            'deepblogger_options'
+        );
+
+        // OpenAI Felder
+        add_settings_field(
+            'deepblogger_openai_api_key',
+            __('OpenAI API Key', 'deepblogger'),
+            array($this, 'openai_api_key_field_callback'),
+            'deepblogger_options',
+            'deepblogger_openai_section'
+        );
+
+        add_settings_field(
+            'deepblogger_openai_model',
+            __('OpenAI Modell', 'deepblogger'),
+            array($this, 'openai_model_field_callback'),
+            'deepblogger_options',
+            'deepblogger_openai_section'
+        );
+
+        // Deepseek Sektion
+        add_settings_section(
+            'deepblogger_deepseek_section',
+            __('Deepseek Einstellungen', 'deepblogger'),
+            array($this, 'deepseek_section_callback'),
+            'deepblogger_options'
+        );
+
+        // Deepseek Felder
+        add_settings_field(
+            'deepblogger_deepseek_api_key',
+            __('Deepseek API Key', 'deepblogger'),
+            array($this, 'deepseek_api_key_field_callback'),
+            'deepblogger_options',
+            'deepblogger_deepseek_section'
+        );
+
+        add_settings_field(
+            'deepblogger_deepseek_model',
+            __('Deepseek Modell', 'deepblogger'),
+            array($this, 'deepseek_model_field_callback'),
+            'deepblogger_options',
+            'deepblogger_deepseek_section'
+        );
+
+        // Registriere die Einstellungen
         register_setting(
             'deepblogger_options',
             'deepblogger_ai_provider',
@@ -124,7 +216,6 @@ class DeepBlogger_Admin {
             )
         );
 
-        // OpenAI Einstellungen
         register_setting(
             'deepblogger_options',
             'deepblogger_openai_api_key',
@@ -140,15 +231,11 @@ class DeepBlogger_Admin {
             'deepblogger_openai_model',
             array(
                 'type' => 'select',
-                'id' => 'deepblogger_openai_model',
-                'name' => __('OpenAI Modell', 'deepblogger'),
-                'description' => __('Wählen Sie das zu verwendende OpenAI-Modell.', 'deepblogger'),
-                'options' => array(), // Wird dynamisch durch AJAX gefüllt
+                'sanitize_callback' => 'sanitize_text_field',
                 'default' => ''
             )
         );
 
-        // Deepseek Einstellungen
         register_setting(
             'deepblogger_options',
             'deepblogger_deepseek_api_key',
@@ -169,7 +256,6 @@ class DeepBlogger_Admin {
             )
         );
 
-        // Allgemeine Einstellungen
         register_setting(
             'deepblogger_options',
             'deepblogger_posts_per_category',
@@ -189,90 +275,13 @@ class DeepBlogger_Admin {
                 'default' => array()
             )
         );
+    }
 
-        // KI-Provider Sektion
-        add_settings_section(
-            'deepblogger_ai_provider_section',
-            __('KI-Anbieter Einstellungen', 'deepblogger'),
-            array($this, 'ai_provider_section_callback'),
-            'deepblogger_options'
-        );
-
-        // OpenAI Sektion
-        add_settings_section(
-            'deepblogger_openai_section',
-            __('OpenAI Einstellungen', 'deepblogger'),
-            array($this, 'openai_section_callback'),
-            'deepblogger_options'
-        );
-
-        // Deepseek Sektion
-        add_settings_section(
-            'deepblogger_deepseek_section',
-            __('Deepseek Einstellungen', 'deepblogger'),
-            array($this, 'deepseek_section_callback'),
-            'deepblogger_options'
-        );
-
-        // KI-Provider Feld
-        add_settings_field(
-            'deepblogger_ai_provider',
-            __('KI-Anbieter', 'deepblogger'),
-            array($this, 'ai_provider_field_callback'),
-            'deepblogger_options',
-            'deepblogger_ai_provider_section'
-        );
-
-        // OpenAI Felder
-        add_settings_field(
-            'deepblogger_openai_api_key',
-            __('OpenAI API Key', 'deepblogger'),
-            array($this, 'openai_api_key_field_callback'),
-            'deepblogger_options',
-            'deepblogger_openai_section'
-        );
-
-        add_settings_field(
-            'deepblogger_openai_model',
-            __('OpenAI Modell', 'deepblogger'),
-            array($this, 'openai_model_field_callback'),
-            'deepblogger_options',
-            'deepblogger_openai_section'
-        );
-
-        // Deepseek Felder
-        add_settings_field(
-            'deepblogger_deepseek_api_key',
-            __('Deepseek API Key', 'deepblogger'),
-            array($this, 'deepseek_api_key_field_callback'),
-            'deepblogger_options',
-            'deepblogger_deepseek_section'
-        );
-
-        add_settings_field(
-            'deepblogger_deepseek_model',
-            __('Deepseek Modell', 'deepblogger'),
-            array($this, 'deepseek_model_field_callback'),
-            'deepblogger_options',
-            'deepblogger_deepseek_section'
-        );
-
-        // Allgemeine Felder
-        add_settings_field(
-            'deepblogger_posts_per_category',
-            __('Beiträge pro Kategorie', 'deepblogger'),
-            array($this, 'posts_per_category_field_callback'),
-            'deepblogger_options',
-            'deepblogger_ai_provider_section'
-        );
-
-        add_settings_field(
-            'deepblogger_post_categories',
-            __('Kategorien', 'deepblogger'),
-            array($this, 'categories_field_callback'),
-            'deepblogger_options',
-            'deepblogger_ai_provider_section'
-        );
+    /**
+     * Callback für die allgemeine Sektion
+     */
+    public function general_section_callback() {
+        echo '<p>' . esc_html__('Konfigurieren Sie hier die grundlegenden Einstellungen für die Beitragsgenerierung.', 'deepblogger') . '</p>';
     }
 
     /**
