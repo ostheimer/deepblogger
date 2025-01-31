@@ -36,37 +36,33 @@ class OpenAIService {
     }
 
     /**
-     * Hole verfügbare Modelle von OpenAI
-     *
-     * @return array Array mit Modellen oder Fehlermeldung
+     * Holt die verfügbaren Modelle von der OpenAI API
      */
     public function get_available_models() {
-        // Prüfe Cache zuerst
-        $cached_models = get_transient('deepblogger_openai_models');
-        if ($cached_models !== false) {
-            return $cached_models;
-        }
+        $logger = DeepBlogger_Logger::get_instance();
+        $logger->debug('Starte Abruf der verfügbaren Modelle von OpenAI');
 
-        // Wenn kein API-Key vorhanden, gib Fehlermeldung zurück
-        if (empty($this->api_key)) {
+        $api_key = get_option('deepblogger_openai_api_key');
+        if (empty($api_key)) {
+            $logger->error('Kein OpenAI API Key konfiguriert');
             return array(
                 'success' => false,
-                'message' => __('Bitte geben Sie einen gültigen OpenAI API-Schlüssel ein.', 'deepblogger')
+                'message' => __('Bitte konfigurieren Sie zuerst Ihren OpenAI API-Schlüssel.', 'deepblogger')
             );
         }
 
-        $response = wp_remote_get(
-            $this->api_base . '/models',
-            array(
-                'headers' => array(
-                    'Authorization' => 'Bearer ' . $this->api_key,
-                    'Content-Type' => 'application/json'
-                )
+        $response = wp_remote_get('https://api.openai.com/v1/models', array(
+            'headers' => array(
+                'Authorization' => 'Bearer ' . $api_key,
+                'Content-Type' => 'application/json'
             )
-        );
+        ));
 
         if (is_wp_error($response)) {
-            error_log('DeepBlogger OpenAI API Error: ' . $response->get_error_message());
+            $logger->error('API-Anfrage fehlgeschlagen', array(
+                'error_message' => $response->get_error_message(),
+                'error_code' => $response->get_error_code()
+            ));
             return array(
                 'success' => false,
                 'message' => __('Fehler bei der Verbindung zur OpenAI API.', 'deepblogger')
@@ -76,40 +72,51 @@ class OpenAIService {
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
 
-        if (!isset($data['data']) || !is_array($data['data'])) {
-            error_log('DeepBlogger OpenAI API Error: Ungültige Antwort erhalten');
+        if (empty($data) || !isset($data['data']) || !is_array($data['data'])) {
+            $logger->error('Ungültige API-Antwort', array(
+                'response' => $body
+            ));
             return array(
                 'success' => false,
-                'message' => __('Ungültige Antwort von der OpenAI API erhalten.', 'deepblogger')
+                'message' => __('Ungültige Antwort von der OpenAI API.', 'deepblogger')
             );
         }
 
-        // Filtere nur die gewünschten Modelle
-        $filtered_models = array();
-        foreach ($data['data'] as $model) {
-            if ($this->is_supported_model($model['id'])) {
-                $filtered_models[$model['id']] = $this->get_model_display_name($model['id']);
-            }
-        }
+        $chat_models = array_filter($data['data'], function($model) {
+            return strpos($model['id'], 'gpt') === 0 && $model['object'] === 'model';
+        });
 
-        if (empty($filtered_models)) {
+        $logger->info('Chat-Modelle gefunden', array(
+            'count' => count($chat_models),
+            'models' => array_column($chat_models, 'id')
+        ));
+
+        if (empty($chat_models)) {
+            $logger->warning('Keine Chat-Modelle gefunden');
             return array(
                 'success' => false,
-                'message' => __('Keine unterstützten Modelle gefunden.', 'deepblogger')
+                'message' => __('Keine Chat-Modelle verfügbar.', 'deepblogger')
             );
         }
 
-        // Cache die Ergebnisse
-        set_transient('deepblogger_openai_models', array(
-            'success' => true,
-            'models' => $filtered_models,
-            'message' => __('Modelle erfolgreich geladen.', 'deepblogger')
-        ), $this->cache_duration);
+        $formatted_models = array_map(function($model) {
+            return array(
+                'id' => $model['id'],
+                'name' => $this->get_model_display_name($model['id'])
+            );
+        }, $chat_models);
+
+        $logger->debug('Formatierte Modelle', array(
+            'models' => $formatted_models
+        ));
 
         return array(
             'success' => true,
-            'models' => $filtered_models,
-            'message' => __('Modelle erfolgreich geladen.', 'deepblogger')
+            'models' => $formatted_models,
+            'message' => sprintf(
+                __('%d Modelle gefunden.', 'deepblogger'),
+                count($formatted_models)
+            )
         );
     }
 

@@ -68,6 +68,8 @@ settings_errors('deepblogger_messages');
     </div>
 </div>
 
+<!-- Debug-Bereich wird dynamisch durch JavaScript hinzugefügt -->
+
 <style>
 .deepblogger-section {
     background: #fff;
@@ -125,19 +127,13 @@ settings_errors('deepblogger_messages');
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    function debugLog(msg) {
-        if (console && console.log) {
-            console.log('[DeepBlogger Debug]', msg);
-        }
-    }
-
     // Lade verfügbare Modelle
     function loadAvailableModels(provider) {
         var $modelSelect = provider === 'openai' ? $('#deepblogger_openai_model') : $('#deepblogger_deepseek_model');
         var $modelStatus = $modelSelect.siblings('.model-status');
         
         $modelSelect.prop('disabled', true);
-        $modelStatus.text($modelSelect.data('loading')).show();
+        $modelStatus.text('Lade verfügbare Modelle...').show();
 
         $.ajax({
             url: ajaxurl,
@@ -173,7 +169,6 @@ jQuery(document).ready(function($) {
                     $modelStatus.text(errorMsg)
                         .addClass('notice-error')
                         .removeClass('notice-success');
-                    debugLog('Error loading models:', response);
                 }
             },
             error: function(xhr, status, error) {
@@ -181,7 +176,6 @@ jQuery(document).ready(function($) {
                 $modelStatus.text(errorMsg)
                     .addClass('notice-error')
                     .removeClass('notice-success');
-                debugLog('Ajax error:', error);
             },
             complete: function() {
                 $modelSelect.prop('disabled', false);
